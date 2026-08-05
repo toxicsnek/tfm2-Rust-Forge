@@ -1,0 +1,141 @@
+# Working With TFM2 Rust Forge
+
+## 1. Launch Forge
+
+Run `tfm2_rust_forge.exe`. The editor itself does not require Rust to launch.
+
+## 2. Configure Paths
+
+Set the following paths in the project settings:
+
+- Stable SDK root, normally:
+  `C:\Program Files (x86)\Steam\steamapps\common\Teamfight Manager2\mod-sdk-stable`
+- Teamfight Manager 2 mods root, normally:
+  `C:\Program Files (x86)\Steam\steamapps\common\Teamfight Manager2\mods`
+
+The SDK root must contain `mod-api-stable`.
+
+## 3. Create Or Import A Project
+
+Use a new project for a new mod or import an existing mod folder. Keep the project and exported workspace paths accessible to the current Windows user.
+
+## 4. Configure The Champion
+
+In the Identity and Stats sections:
+
+- Set the champion ID and display name.
+- Choose category and tags.
+- Set icons and other identity assets.
+- Configure base stats and growth stats.
+- Define reusable named buffs.
+
+Buffs should be defined before building effects that add, remove, or check them.
+
+## 5. Configure An Ability
+
+Select Attack, Skill, Skill2, Ultimate, or Passive and configure:
+
+- Casting type
+- Casting target
+- Range
+- Start timing
+- Duration
+- Cooldown
+- Charges
+- Description
+
+Use Position casting for effects that need a cast location and Direction casting for effects that need a cast direction.
+
+## 6. Build The Effect Graph
+
+Add timed groups to control when effects occur. Add effects inside each group and use nested child editors to build branches.
+
+Common patterns:
+
+- Use `Target Self` to apply child effects to the caster.
+- Use `Area` to create Friendly and Enemy target lists.
+- Use `If` to filter or select targets for True and False branches.
+- Use `Find Nearest With Buff` when a branch should find buffed allies or enemies independently of the current target.
+- Use `Move To` after a target-producing effect to move toward the first selected target.
+
+## 7. Configure Formulas
+
+Damage, healing, shields, and similar numeric effects use formula editors.
+
+- Set a flat Base value.
+- Add terms with `+ Term`.
+- Choose Caster or Target as the term source.
+- Choose the stat used by the term.
+- Set the percentage contribution.
+
+## 8. Configure Move To
+
+Move To reads its target source from the ability's casting type:
+
+- `Targeting`: selected entity
+- `Position`: cast position
+- `Direction`: cast direction
+
+Use:
+
+- Minimum Distance to force at least that much travel.
+- Maximum Distance to stop short of a farther destination.
+- Offset X/Y to adjust the final landing point.
+- Move Away to reverse the travel direction.
+
+## 9. Configure Projectiles
+
+For Spawn Projectile:
+
+1. Choose `Target` or `Linear` Move Kind.
+2. Set Radius and Speed.
+3. Configure the hit attack/casting types and target filter.
+4. Enable On Caster if the projectile should start at the caster.
+5. Enable Penetrate if it should continue through hits.
+6. Set Max Targets when Penetrate is enabled; use `0` for uncapped behavior.
+7. Give the projectile a unique Projectile Name.
+8. Add effects under Effects On Hit.
+
+On-hit effects apply to the entity struck by the projectile, not the parent effect's previous target.
+
+The SDK currently supports exact one-hit and uncapped projectile behavior. A reliable per-projectile cap above one is not available because projectile hit callbacks do not expose projectile identity.
+
+## 10. Export The Project
+
+Use the project export workflow to generate the managed Rust workspace and mod assets. Verify that the selected SDK path and export/mod paths are correct before exporting.
+
+## 11. Install Rust For Building
+
+Rust is not required just to run Forge, but it is required to export/build mods.
+
+1. Download and run `rustup-init.exe` from `https://www.rust-lang.org/tools/install`.
+2. Choose the default installation and the MSVC toolchain.
+3. Open a new PowerShell window.
+4. Verify the installation:
+
+   ```powershell
+   rustc --version
+   cargo --version
+   ```
+
+If Cargo reports a missing linker or Windows SDK, install Visual Studio Build Tools from `https://visualstudio.microsoft.com/visual-cpp-build-tools/` and select the `Desktop development with C++` workload.
+
+## 12. Build The Mod
+
+Forge runs Cargo in the exported managed workspace. Build from that workspace with:
+
+```powershell
+cargo build --release
+```
+
+The target PC must have Teamfight Manager 2, the stable SDK, and the configured mods directory available.
+
+## 13. Deploy And Test
+
+Copy or deploy the generated mod package/DLL to the configured Teamfight Manager 2 mods directory, then launch the game and test the champion.
+
+If behavior is unexpected, inspect the generated mod log in the Windows temporary directory. Projectile spawning and hit effects emit diagnostic information for origin, target, movement kind, speed, and penetration.
+
+## Current Limitation
+
+`Draw Sprite` is present in the effect list but is not implemented yet. Adding it does not currently render a sprite.
