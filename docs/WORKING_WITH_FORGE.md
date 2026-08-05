@@ -28,8 +28,11 @@ In the Identity and Stats sections:
 - Set icons and other identity assets.
 - Configure base stats and growth stats.
 - Define reusable named buffs.
+- Define named persistent counters and flags for mechanics that must survive death.
 
 Buffs should be defined before building effects that add, remove, or check them.
+
+Persistent state names should be defined before using `Modify Persistent Counter`, `Set Persistent Flag`, `Persistent Counter`, or `Persistent Flag`.
 
 ## 5. Configure An Ability
 
@@ -67,6 +70,8 @@ Damage, healing, shields, and similar numeric effects use formula editors.
 - Choose Caster or Target as the term source.
 - Choose the stat used by the term.
 - Set the percentage contribution.
+
+The `Stacks` stat can be selected as a Caster or Target term and scales like any other stat term.
 
 ## 8. Configure Move To
 

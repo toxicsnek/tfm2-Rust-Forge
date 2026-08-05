@@ -70,6 +70,14 @@ Removes all crowd-control effects from the current target.
 
 Changes the caster's base stat block. Non-stack values are calculated from the champion's base stats plus the configured value. Stack values accumulate from the current stack.
 
+### Modify Persistent Counter
+
+Adds or subtracts from a named champion counter stored outside the normal stat block. Counters persist through death for the current match.
+
+### Set Persistent Flag
+
+Sets a named boolean flag that persists through death for the current match. Flags are useful for one-time transitions such as switching modes after a counter reaches a threshold.
+
 ### Move To
 
 Moves the caster using the ability's casting input:
@@ -150,6 +158,18 @@ Checks whether the current target has no living ally within the configured range
 ### Has Shield
 
 Checks whether the current target has a shield.
+
+### Has Stacks
+
+Checks whether the current target's Stacks stat is greater than or equal to the configured Count.
+
+### Persistent Counter
+
+Checks whether a named persistent counter is greater than or equal to the configured Count.
+
+### Persistent Flag
+
+Checks whether a named persistent flag is set.
 
 ### Find Nearest With Buff
 
