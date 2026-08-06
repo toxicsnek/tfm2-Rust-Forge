@@ -51,7 +51,20 @@ Select Attack, Skill, Skill2, Ultimate, or Passive and configure:
 
 Use Position casting for effects that need a cast location and Direction casting for effects that need a cast direction.
 
-## 6. Build The Effect Graph
+## 6. Choose Rust Or Data Implementation
+
+Under Champion Identity, choose the implementation for the selected champion:
+
+- `Rust-based` edits the existing Rust ability graphs and generates native Rust champion code.
+- `Data-based` edits a separate Data ability graph and exports `champion/<id>.data_champion`.
+
+The two graph types are independent. Forge does not convert the Rust graph into the Data graph or vice versa. Use the `Import Data` toolbar action to bring an existing `.data_champion` file into the project.
+
+Data effect branches are edited recursively. Missing branches are created with their `Add Effect` button rather than being created just by drawing the editor. Native Data effects must reference a Native Effect defined under **Identity → Native Effects**.
+
+For `RangeProjectile` and `LineRangeProjectile`, set `Apply ticks` to the numeric duration of the area application. `apply_type` values such as `AroundTarget` are only used by `RangeEffect`.
+
+## 7. Build The Effect Graph
 
 Add timed groups to control when effects occur. Add effects inside each group and use nested child editors to build branches.
 
@@ -66,7 +79,7 @@ Common patterns:
 
 `Spawn Unit` and `Draw Sprite` are not implemented yet. The SDK does not properly support the required behavior.
 
-## 7. Configure Formulas
+## 8. Configure Formulas
 
 Damage, healing, shields, and similar numeric effects use formula editors.
 
@@ -78,7 +91,7 @@ Damage, healing, shields, and similar numeric effects use formula editors.
 
 The `Stacks` stat can be selected as a Caster or Target term and scales like any other stat term.
 
-## 8. Configure Move To
+## 9. Configure Move To
 
 Move To reads its target source from the ability's casting type:
 
@@ -94,7 +107,7 @@ Use:
 - Offset X/Y to adjust the final landing point.
 - Move Away to reverse the travel direction.
 
-## 9. Configure Play Animation
+## 10. Configure Play Animation
 
 Add `Play Animation` from the `Status / Other` effect menu. Set:
 
@@ -103,7 +116,7 @@ Add `Play Animation` from the `Status / Other` effect menu. Set:
 
 The effect applies the Animation CC to the caster, not the current target.
 
-## 10. Configure Projectiles
+## 11. Configure Projectiles
 
 For Spawn Projectile:
 
@@ -120,11 +133,11 @@ On-hit effects apply to the entity struck by the projectile, not the parent effe
 
 The SDK currently supports exact one-hit and uncapped projectile behavior. A reliable per-projectile cap above one is not available because projectile hit callbacks do not expose projectile identity.
 
-## 11. Export The Project
+## 12. Export The Project
 
 Use the project export workflow to generate the managed Rust workspace and mod assets. Forge clears and regenerates managed workspaces automatically. Managed export roots are also cleared before packaging to prevent stale generated files; imported/source-backed mods use conservative cleanup. Verify that the selected SDK path and export/mod paths are correct before exporting.
 
-## 12. Install Rust For Building
+## 13. Install Rust For Building
 
 Rust is not required just to run Forge, but it is required to export/build mods.
 
@@ -140,7 +153,7 @@ Rust is not required just to run Forge, but it is required to export/build mods.
 
 If Cargo reports a missing linker or Windows SDK, install Visual Studio Build Tools from `https://visualstudio.microsoft.com/visual-cpp-build-tools/` and select the `Desktop development with C++` workload.
 
-## 13. Build The Mod
+## 14. Build The Mod
 
 Forge runs Cargo in the exported managed workspace. Build from that workspace with:
 
@@ -150,12 +163,12 @@ cargo build --release
 
 The target PC must have Teamfight Manager 2, the stable SDK, and the configured mods directory available.
 
-## 14. Deploy And Test
+## 15. Deploy And Test
 
 Copy or deploy the generated mod package/DLL to the configured Teamfight Manager 2 mods directory, then launch the game and test the champion.
 
 If behavior is unexpected, first confirm that Forge generated and deployed the current managed workspace and DLL. Temporary generated diagnostic logging is disabled in normal builds.
 
-## 15. VFX Assets
+## 16. VFX Assets
 
 Projectile VFX assets can be selected with `Pick PNG`. `Draw Sprite` is not implemented yet because the SDK does not properly support it.

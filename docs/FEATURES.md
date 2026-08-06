@@ -2,6 +2,30 @@
 
 TFM2 Rust Forge is a Windows desktop editor for creating Teamfight Manager 2 stable Rust mods. It generates the Rust champion code, mod assets, and managed workspace used to build the native mod DLL.
 
+## Implementation Modes
+
+- **Rust-based** champions use the existing Rust ability graph and export generated native Rust champion code.
+- **Data-based** champions use an independent typed Data ability/effect graph and export a `.data_champion` file.
+- Rust and Data graphs are intentionally independent; changing implementation mode does not convert one graph into the other.
+- Data champions may reference champion-scoped Native Effects when a mechanic requires native Rust behavior.
+
+## Data Champions
+
+Data champions can be imported with the `Import Data` toolbar action or created by selecting `Data-based` under Champion Identity. The Data editor supports Attack, Skill, Skill2, and Ultimate actions with recursive child effects.
+
+Supported Data effect groups include:
+
+- Damage and sustain: `Attack`, `ApAttack`, `FixedAttack`, `Heal`, `Shield`.
+- Crowd control: `Stun`, `Bind`, `Airborne`, `Knockback`, `Grab`, `Pull`, `Fear`, `Charm`, `Taunt`, blocking, invisibility, and banish.
+- Movement: rush, teleport, directional teleport, move-back, move-to, and rush-behind effects.
+- Projectiles and areas: target and linear projectiles, delayed areas, periodic areas, range effects, parabolic projectiles, and shrinking barriers.
+- Buffs and composition: add/remove buffs, casted effects, combine, delayed, self-targeting, random target, and switch branches.
+- Native and presentation effects: native effect references, view effects, animations, and sound effects.
+
+For Range and Line Range Projectiles, `Apply ticks` is exported as the SDK numeric `apply` field. `AroundTarget` and similar values belong to the `RangeEffect` `apply_type` field, not projectile `apply`.
+
+Data export writes files to `champion/<champion-id>.data_champion` and validates Native effect references before writing.
+
 ## Projects And Champions
 
 - Create a new Forge project or import an existing mod.
@@ -79,9 +103,17 @@ Changes the caster's base stat block. Non-stack values are calculated from the c
 
 Adds or subtracts from a named champion counter stored outside the normal stat block. Counters persist through death for the current match.
 
+The target defaults to the first current target. Enable **Target Is Caster** to modify the caster's counter instead.
+
+### Reset Counter
+
+Clears a named persistent counter. Clearing a counter that does not exist is harmless. The target defaults to the first current target; enable **Target Is Caster** to clear the caster's counter instead.
+
 ### Set Persistent Flag
 
 Sets a named boolean flag that persists through death for the current match. Flags are useful for one-time transitions such as switching modes after a counter reaches a threshold.
+
+Enable **Target Is Caster** to set the caster's flag instead of the first current target's flag.
 
 ### Move To
 
@@ -129,6 +161,24 @@ Replaces the current target context with the caster for its child effects.
 ### If
 
 Evaluates conditions and sends selected targets to True or False child branches. Maximum Targets limits each branch independently. A value of 0 disables both branches.
+
+Conditions that read persistent state support **Target Caster**, which evaluates the caster's state instead of the current target's state.
+
+### Get Target
+
+Builds a target list for child effects. Selectors include nearest, farthest, lowest HP percentage, highest HP percentage, random, allies around the caster, enemies around the caster, and enemies around the target. Selectors support team filtering, champion-only filtering, range checks, and delayed child groups. Towers are excluded from selector results.
+
+Maximum-target limiting is currently disabled for Get Target. Selectors that inherently choose one target, such as nearest or lowest HP percentage, still return one target.
+
+### Periodic Effect
+
+Registers a timed effect on each selected target. Configure interval, duration, and whether the first pulse is immediate. Periodic effects support stacking, maximum stacks, and refresh-on-reapplication behavior. Their pulses are dispatched from generated `on_update` logic, and the instance ends when its target dies.
+
+### Native Effects
+
+Defines reusable champion-scoped effects under **Identity -> Native Effects**. Each Native Effect contains timed child groups and is emitted as a stable native effect implementation and registration.
+
+Use **Queue Effect** to select a defined Native Effect from a dropdown and queue it for a target after the configured delay. Native Effect names must be unique within the mod and are converted to valid generated Rust type names.
 
 ### Queue Effect
 
