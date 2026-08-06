@@ -27,7 +27,7 @@ In the Identity and Stats sections:
 - Choose category and tags.
 - Set icons and other identity assets.
 - Configure base stats and growth stats.
-- Define reusable named buffs.
+- Define reusable named buffs under **Identity → Buffs**.
 - Define named persistent counters and flags for mechanics that must survive death.
 
 New champions start with base Attack 100, HP 1000, Defence 25, Magic Resistance 25, and Move Speed 1100. Their default growth is Attack 20, HP 100, Defence 5, Magic Resistance 5, and Move Speed 10. Other default stat values are zero.
@@ -63,6 +63,8 @@ Common patterns:
 - Use `Find Nearest With Buff` when a branch should find buffed allies or enemies independently of the current target.
 - Use `Move To` after a target-producing effect to move toward the first selected target.
 - Use `Play Animation` to apply a named animation to the caster for a configured duration.
+
+`Spawn Unit` and `Draw Sprite` are not implemented yet. The SDK does not properly support the required behavior.
 
 ## 7. Configure Formulas
 
@@ -156,4 +158,4 @@ If behavior is unexpected, first confirm that Forge generated and deployed the c
 
 ## 15. VFX Assets
 
-Use `Pick PNG` in `Draw Sprite` or projectile VFX settings. Forge copies the selected file into the exported mod's `fx/` directory and uses the generated runtime path automatically. Standalone sprites render at the selected target's position, or at the caster position when `On Caster` is enabled.
+Projectile VFX assets can be selected with `Pick PNG`. `Draw Sprite` is not implemented yet because the SDK does not properly support it.

@@ -45,7 +45,7 @@ Heals the current target using a formula. Optional controls support healing the 
 
 ### Shield
 
-Adds a damage-absorbing shield layer to the current target using a formula. Shield duration is configured in ticks; newly created Shield effects default to 360 ticks. (6 seconds)
+Adds a damage-absorbing shield layer to the current target using a formula. Shield duration is configured in ticks; newly created Shield effects default to 360 ticks (6 seconds).
 
 ### Remove Shield
 
@@ -53,11 +53,11 @@ Removes every shield layer from the current target.
 
 ### Add Buff
 
-Applies a named champion buff to the current target.    *Buffs defined under Identity - Buffs.*
+Applies a named champion buff to the current target. Buffs are defined under **Identity → Buffs**.
 
 ### Remove Buff
 
-Removes a named buff from the current target.   *Buffs defined under Identity - Buffs.*
+Removes a named buff from the current target. Buffs are defined under **Identity → Buffs**.
 
 ### Apply CC
 
@@ -95,7 +95,7 @@ Move To supports minimum distance, maximum distance, signed X/Y landing offsets,
 
 ### Spawn Unit
 
-Creates a named unit at the current target position with configurable duration and count. **not implemented yet**
+**Not yet implemented.**
 
 ### Spawn Projectile
 
@@ -136,7 +136,7 @@ Queues a registered native effect by name after the configured delay.
 
 ### Draw Sprite
 
-**not implemented yet** SDK does not properly support this.
+**Not implemented yet.** The SDK does not properly support this.
 
 ## Conditions
 
