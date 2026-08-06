@@ -7,6 +7,7 @@ TFM2 Rust Forge is a Windows desktop editor for creating Teamfight Manager 2 sta
 - Create a new Forge project or import an existing mod.
 - Configure the stable SDK root and Teamfight Manager 2 mods root.
 - Define champion identity, category, tags, icons, base stats, and growth stats.
+- New champions default to base stats of Attack 100, HP 1000, Defence 25, Magic Resistance 25, and Move Speed 1100, with growth stats of Attack 20, HP 100, Defence 5, Magic Resistance 5, and Move Speed 10. Other default stat values are zero.
 - Configure attack, skill, skill2, ultimate, and passive ability graphs.
 - Export generated Rust source and shared mod assets.
 - Build the exported managed workspace through Cargo.
@@ -44,7 +45,7 @@ Heals the current target using a formula. Optional controls support healing the 
 
 ### Shield
 
-Adds a damage-absorbing shield layer to the current target using a formula. Shield duration is configured in ticks; newly created Shield effects default to 360 ticks (6 seconds).
+Adds a damage-absorbing shield layer to the current target using a formula. Shield duration is configured in ticks; newly created Shield effects default to 360 ticks. (6 seconds)
 
 ### Remove Shield
 
@@ -52,15 +53,19 @@ Removes every shield layer from the current target.
 
 ### Add Buff
 
-Applies a named champion buff to the current target - defined under Identity - Buffs.
+Applies a named champion buff to the current target.    *Buffs defined under Identity - Buffs.*
 
 ### Remove Buff
 
-Removes a named buff from the current target - defined under Identity - Buffs.
+Removes a named buff from the current target.   *Buffs defined under Identity - Buffs.*
 
 ### Apply CC
 
 Applies a crowd-control effect such as stun, airborne, bind, fear, charm, taunt, or animation CC for the configured duration.
+
+### Play Animation
+
+Applies an Animation CC to the caster. Configure the animation name and duration in ticks. The animation name is truncated to the SDK's supported name capacity.
 
 ### Clear CC
 
@@ -86,7 +91,7 @@ Moves the caster using the ability's casting input:
 - Position moves relative to the cast position.
 - Direction moves along the cast direction.
 
-Move To supports minimum distance, maximum distance, signed X/Y landing offsets, and a Move Away option. Nested Move To effects use the first target in the current target list.
+Move To supports minimum distance, maximum distance, signed X/Y landing offsets, a Move Away option, and an optional Duration Ticks value. Duration `0` moves immediately; positive durations interpolate the movement over that many simulation ticks and cancel when movement-blocking CC is applied. Nested Move To effects use the first target in the current target list.
 
 ### Spawn Unit
 
@@ -131,7 +136,7 @@ Queues a registered native effect by name after the configured delay.
 
 ### Draw Sprite
 
-Reserved for sprite placement and rendering behavior, but it is **not implemented yet**. Adding this effect does not currently draw a sprite.
+**not implemented yet** SDK does not properly support this.
 
 ## Conditions
 
@@ -146,6 +151,18 @@ Checks the distance between caster and current target using an at-most or greate
 ### Below Equal HP Percent
 
 Checks whether the current target's HP percentage is at or below the configured threshold.
+
+### Is Enemy
+
+Checks whether the current target's team differs from the caster's team. Missing entities fail the condition.
+
+### Is Champion
+
+Checks whether the current target is a champion.
+
+### Is Tower
+
+Checks whether the current target is a tower.
 
 ### Is Crowd Controlled
 

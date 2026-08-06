@@ -30,6 +30,8 @@ In the Identity and Stats sections:
 - Define reusable named buffs.
 - Define named persistent counters and flags for mechanics that must survive death.
 
+New champions start with base Attack 100, HP 1000, Defence 25, Magic Resistance 25, and Move Speed 1100. Their default growth is Attack 20, HP 100, Defence 5, Magic Resistance 5, and Move Speed 10. Other default stat values are zero.
+
 Buffs should be defined before building effects that add, remove, or check them.
 
 Persistent state names should be defined before using `Modify Persistent Counter`, `Set Persistent Flag`, `Persistent Counter`, or `Persistent Flag`.
@@ -60,6 +62,7 @@ Common patterns:
 - Use `If` to filter or select targets for True and False branches.
 - Use `Find Nearest With Buff` when a branch should find buffed allies or enemies independently of the current target.
 - Use `Move To` after a target-producing effect to move toward the first selected target.
+- Use `Play Animation` to apply a named animation to the caster for a configured duration.
 
 ## 7. Configure Formulas
 
@@ -83,12 +86,22 @@ Move To reads its target source from the ability's casting type:
 
 Use:
 
+- Duration Ticks to move immediately at `0`, or interpolate the movement over the specified number of ticks.
 - Minimum Distance to force at least that much travel.
 - Maximum Distance to stop short of a farther destination.
 - Offset X/Y to adjust the final landing point.
 - Move Away to reverse the travel direction.
 
-## 9. Configure Projectiles
+## 9. Configure Play Animation
+
+Add `Play Animation` from the `Status / Other` effect menu. Set:
+
+- Animation Name
+- Duration Ticks
+
+The effect applies the Animation CC to the caster, not the current target.
+
+## 10. Configure Projectiles
 
 For Spawn Projectile:
 
@@ -105,11 +118,11 @@ On-hit effects apply to the entity struck by the projectile, not the parent effe
 
 The SDK currently supports exact one-hit and uncapped projectile behavior. A reliable per-projectile cap above one is not available because projectile hit callbacks do not expose projectile identity.
 
-## 10. Export The Project
+## 11. Export The Project
 
-Use the project export workflow to generate the managed Rust workspace and mod assets. Verify that the selected SDK path and export/mod paths are correct before exporting.
+Use the project export workflow to generate the managed Rust workspace and mod assets. Forge clears and regenerates managed workspaces automatically. Managed export roots are also cleared before packaging to prevent stale generated files; imported/source-backed mods use conservative cleanup. Verify that the selected SDK path and export/mod paths are correct before exporting.
 
-## 11. Install Rust For Building
+## 12. Install Rust For Building
 
 Rust is not required just to run Forge, but it is required to export/build mods.
 
@@ -125,7 +138,7 @@ Rust is not required just to run Forge, but it is required to export/build mods.
 
 If Cargo reports a missing linker or Windows SDK, install Visual Studio Build Tools from `https://visualstudio.microsoft.com/visual-cpp-build-tools/` and select the `Desktop development with C++` workload.
 
-## 12. Build The Mod
+## 13. Build The Mod
 
 Forge runs Cargo in the exported managed workspace. Build from that workspace with:
 
@@ -135,12 +148,12 @@ cargo build --release
 
 The target PC must have Teamfight Manager 2, the stable SDK, and the configured mods directory available.
 
-## 13. Deploy And Test
+## 14. Deploy And Test
 
 Copy or deploy the generated mod package/DLL to the configured Teamfight Manager 2 mods directory, then launch the game and test the champion.
 
-If behavior is unexpected, inspect the generated mod log in the Windows temporary directory. Projectile spawning and hit effects emit diagnostic information for origin, target, movement kind, speed, and penetration.
+If behavior is unexpected, first confirm that Forge generated and deployed the current managed workspace and DLL. Temporary generated diagnostic logging is disabled in normal builds.
 
-## Current Limitation
+## 15. VFX Assets
 
-`Draw Sprite` is present in the effect list but is not implemented yet. Adding it does not currently render a sprite.
+Use `Pick PNG` in `Draw Sprite` or projectile VFX settings. Forge copies the selected file into the exported mod's `fx/` directory and uses the generated runtime path automatically. Standalone sprites render at the selected target's position, or at the caster position when `On Caster` is enabled.
