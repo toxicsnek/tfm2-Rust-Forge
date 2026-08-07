@@ -171,4 +171,4 @@ If behavior is unexpected, first confirm that Forge generated and deployed the c
 
 ## 16. VFX Assets
 
-Projectile VFX assets can be selected with `Pick PNG`. `Draw Sprite` is not implemented yet because the SDK does not properly support it.
+`Draw Sprite` is not implemented yet because the SDK does not properly support it.

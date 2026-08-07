@@ -7,7 +7,7 @@ TFM2 Rust Forge is a Windows desktop editor for creating Teamfight Manager 2 sta
 - **Rust-based** champions use the existing Rust ability graph and export generated native Rust champion code.
 - **Data-based** champions use an independent typed Data ability/effect graph and export a `.data_champion` file.
 - Rust and Data graphs are intentionally independent; changing implementation mode does not convert one graph into the other.
-- Data champions may reference champion-scoped Native Effects when a mechanic requires native Rust behavior.
+- **Data champions may reference champion-scoped Native Effects when a mechanic requires native Rust behavior.**
 
 ## Data Champions
 
