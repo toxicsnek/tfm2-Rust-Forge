@@ -7,11 +7,17 @@ TFM2 Rust Forge is a Windows desktop editor for creating Teamfight Manager 2 sta
 - **Rust-based** champions use the existing Rust ability graph and export generated native Rust champion code.
 - **Data-based** champions use an independent typed Data ability/effect graph and export a `.data_champion` file.
 - Rust and Data graphs are intentionally independent; changing implementation mode does not convert one graph into the other.
-- **Data champions may reference champion-scoped Native Effects when a mechanic requires native Rust behavior.**
+- Data champions may reference champion-scoped Native Effects when a mechanic requires native Rust behavior.
+
+### Aseprite Sprite Sources
+
+Champion sprite authoring can use `.ase` or `.aseprite` files directly. Forge reads Aseprite frame tags as animation names for the editor, then copies the source file to the exported mod without extracting or rewriting it. The game reads the Aseprite user-data metadata and prepares the related runtime assets.
 
 ## Data Champions
 
 Data champions can be imported with the `Import Data` toolbar action or created by selecting `Data-based` under Champion Identity. The Data editor supports Attack, Skill, Skill2, and Ultimate actions with recursive child effects.
+
+Data import resolves extensionless `asset/<namespace>/...` references against the source mod folder. It imports champion sprites, skill icons, visual assets, and local SFX sources when physical files are available. Base-game references remain external. Required source-mod override remappings and all available champion localization languages are carried into the project.
 
 Supported Data effect groups include:
 
@@ -22,9 +28,48 @@ Supported Data effect groups include:
 - Buffs and composition: add/remove buffs, casted effects, combine, delayed, self-targeting, random target, and switch branches.
 - Native and presentation effects: native effect references, view effects, animations, and sound effects.
 
+`Sfx` and `TargetSfx` sources support `.mp3`, `.wav`, `.ogg`, and `.flac` files. Local sources are copied during export; unresolved base-game SFX references remain unchanged.
+
 For Range and Line Range Projectiles, `Apply ticks` is exported as the SDK numeric `apply` field. `AroundTarget` and similar values belong to the `RangeEffect` `apply_type` field, not projectile `apply`.
 
 Data export writes files to `champion/<champion-id>.data_champion` and validates Native effect references before writing.
+
+Rust `If` conditions include `Stat A >= B`. Each side uses the standard formula editor with a flat base and Caster/Target stat terms; generated code compares the calculated values at runtime.
+
+Rust `If` conditions also include `Level >=`. Configure the minimum level threshold and use **Target Caster** to check the caster instead of the current target. Negation remains available.
+
+### Data Visuals
+
+Data champions have three named visual-definition sections under Champion Identity:
+
+- **Effect Visuals** export as `view_effects`. Types are `Animation` and `LoopAnimation`.
+- **Projectile Visuals** export as `view_projectiles`. Types are `Animated`, `Sprite`, and `ThreePhase`.
+- **Buff Visuals** export as `view_buffs`. Types are `Animated` and `ThreePhase`.
+
+Data `ViewEffect`, `CasterViewEffect`, and projectile effect names use dropdowns populated from these definitions. Effect Visuals support `is_follow`; Projectile Visuals support `repeat` (default `true`); ThreePhase definitions support `pre_tag`, `loop_tag`, `remove_tag`, and `z`.
+
+Area Effects expose a `Target` dropdown using the stable SDK casting-target types. The selected value is exported as the Data schema's `target` field.
+
+Animation and Sprite definitions store source object paths in Forge. During export, Forge converts them to game asset references, copies custom assets into the exported mod folder, and copies matching animation companions. For example:
+
+```text
+Source: C:/mods/my_mod/effects/projectile#anim.fanim
+Output: <export-root>/effects/projectile#anim.fanim
+        <export-root>/effects/projectile#sheet.png
+JSON:   asset/my_mod/effects/projectile
+```
+
+Animated Effect Visuals, Projectile Visuals, and Buff Visuals also accept `.ase` and `.aseprite` sources. These are copied directly and referenced by their base asset path:
+
+```text
+Source: C:/mods/my_mod/effects/burn.aseprite
+Output: <export-root>/effects/burn.aseprite
+JSON:   asset/my_mod/effects/burn
+```
+
+The game's Aseprite loader uses the sprite user-data metadata to prepare `#sheet` and `#anim`; Forge does not generate those files for a native Aseprite source.
+
+Sprite files retain their physical extension in the mod folder, while the Data JSON Sprite reference omits image extensions, matching the SDK convention.
 
 ## Projects And Champions
 
@@ -34,7 +79,7 @@ Data export writes files to `champion/<champion-id>.data_champion` and validates
 - New champions default to base stats of Attack 100, HP 1000, Defence 25, Magic Resistance 25, and Move Speed 1100, with growth stats of Attack 20, HP 100, Defence 5, Magic Resistance 5, and Move Speed 10. Other default stat values are zero.
 - Configure attack, skill, skill2, ultimate, and passive ability graphs.
 - Export generated Rust source and shared mod assets.
-- Build the exported managed workspace through Cargo.
+- Build copies the generated Cargo project into the target mod folder and runs Cargo there, so the deployed DLL is built from the source files shipped with that mod.
 
 ## Ability Settings
 
@@ -58,6 +103,10 @@ Champions can define reusable named buffs. Buff definitions include stat changes
 Add Buff, Remove Buff, and buff conditions use the champion's named buff definitions.
 
 ## Effects
+
+### Modify Stats
+
+Changes the caster's level-scaled base stats by the configured deltas. Each stat can independently enable **Stat Scales With Stacks** and set a per-stack multiplier. For example, a multiplier of `1` adds one point per stack, while a multiplier of `300` adds 300 points per stack. Stack scaling uses the caster's current `Stack` value and works in both champion effects and Native Effects.
 
 ### Deal Damage
 
@@ -103,6 +152,8 @@ Changes the caster's base stat block. Non-stack values are calculated from the c
 
 Adds or subtracts from a named champion counter stored outside the normal stat block. Counters persist through death for the current match.
 
+Each mutation is logged by the generated mod to `%TEMP%/<mod_id>.log` with the simulation ID, counter name, previous value, delta, and resulting value. Counters are simulation-local Forge state. They are not synchronized between rush/background and gameplay simulations, so they are not safe for gameplay-critical mechanics.
+
 The target defaults to the first current target. Enable **Target Is Caster** to modify the caster's counter instead.
 
 ### Reset Counter
@@ -127,7 +178,11 @@ Move To supports minimum distance, maximum distance, signed X/Y landing offsets,
 
 ### Spawn Unit
 
-**Not yet implemented.**
+Spawns duration-limited combat units and tracks each returned entity ID by summoner and unit name. `Get Target` can select live units from that tracking group. Spawned units can optionally have their own attacks blocked or be invincible, including permanent protection for duration `0`. A selected Native Effect is queued once; repeating effects must queue themselves with `Queue Effect`. `Get Target` also supports `Trigger On Initial Target` child groups for applying a final effect to the original target after a successful selection. `Consume Timer Target` stops queued spawned-unit effects after a successful target branch and can optionally destroy the spawn with **Destroy Spawn On Trigger**.
+
+### Refresh Stacks
+
+Manually repairs missing persistent state for the caster. It restores only missing persisted buff copies and ModifyStats stacks; existing buffs and stacks are left unchanged. Persistent counters are already stored in Forge state and are not modified by refresh. This is useful for Rust graphs and Native Effects used by data champions after respawn or another host-side state reset.
 
 ### Spawn Projectile
 
